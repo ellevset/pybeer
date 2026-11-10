@@ -1,0 +1,16 @@
+<h1>Christmas beer tasting</h1>
+<p><a href="{% url 'my_votes' %}">My votes</a></p>
+
+<ul>
+  {% for beer in beers %}
+    <li>
+      {{ beer.name }}{% if beer.brewery %} — {{ beer.brewery }}{% endif %}
+      {% if beer.style %} ({{ beer.style }}){% endif %}
+      {% if beer.abv %} · {{ beer.abv }}% ABV{% endif %}
+      — Your vote: {{ beer.my_score|default:"Not voted" }}
+      <a href="{% url 'vote_for_beer' beer.id %}">Vote / edit</a>
+    </li>
+  {% empty %}
+    <li>No beers have been added yet.</li>
+  {% endfor %}
+</ul>

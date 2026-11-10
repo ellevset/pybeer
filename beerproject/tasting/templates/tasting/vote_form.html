@@ -1,0 +1,7 @@
+<h1>Vote: {{ beer.name }}</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save vote</button>
+</form>
+<p><a href="{% url 'beer_list' %}">Back to beers</a></p>

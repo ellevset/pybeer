@@ -1,0 +1,12 @@
+<h1>My votes</h1>
+<ul>
+  {% for vote in votes %}
+    <li>
+      {{ vote.beer.name }} — {{ vote.score }}/5
+      {% if vote.comment %}: {{ vote.comment }}{% endif %}
+    </li>
+  {% empty %}
+    <li>You haven't voted on any beers yet.</li>
+  {% endfor %}
+</ul>
+<p><a href="{% url 'beer_list' %}">Back to beers</a></p>
