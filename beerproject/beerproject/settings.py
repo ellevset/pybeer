@@ -92,7 +92,18 @@ DATABASES = {
         "PASSWORD": os.environ["PGPASSWORD"],
         "HOST": os.getenv("PGHOST", "localhost"),
         "PORT": os.getenv("PGPORT", "5432"),
-    }
+    },
+    "legacy": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["LEGACY_PGDATABASE"],
+        "USER": os.environ["LEGACY_PGUSER"],
+        "PASSWORD": os.environ["LEGACY_PGPASSWORD"],
+        "HOST": os.getenv("LEGACY_PGHOST", "localhost"),
+        "PORT": os.getenv("LEGACY_PGPORT", "5432"),
+        "OPTIONS": {
+            "options": "-c search_path=data",
+        }
+    },
 }
 
 DATABASE_ROUTERS = ['beerproject.router.TastingRouter']

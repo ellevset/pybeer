@@ -16,6 +16,7 @@ class TasterManager(BaseUserManager):
 
 class Taster(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True)
+    full_name = models.CharField(max_length=200, blank=True)
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "username"
@@ -24,12 +25,56 @@ class Taster(AbstractBaseUser):
     def __str__(self):
         return self.username
 
+class Tasting(models.Model):
+    name = models.CharField(max_length=120, default="Christmas Beer Tasting")
+    year = models.PositiveSmallIntegerField()
+    date = models.DateField(null=True, blank=True)
+    beers = models.ManyToManyField(
+        "Beer",
+        through="TastingBeer",
+        related_name="tastings",
+    )
+
+    class Meta:
+        ordering = ["-year", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "year"],
+                name="unique_tasting_name_year",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.year})"
+
+
+class TastingBeer(models.Model):
+    tasting = models.ForeignKey(
+        Tasting, on_delete=models.CASCADE, related_name="tasting_beers"
+    )
+    beer = models.ForeignKey(
+        "Beer", on_delete=models.CASCADE, related_name="tasting_entries"
+    )
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "beer__name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tasting", "beer"],
+                name="unique_beer_per_tasting",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.beer} at {self.tasting}"
 
 class Beer(models.Model):
     name = models.CharField(max_length=200)
     brewery = models.CharField(max_length=200, blank=True)
     style = models.CharField(max_length=120, blank=True)
     abv = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    introdate = models.DateField()
     description = models.TextField(blank=True)
     source_url = models.URLField(blank=True)
 
@@ -47,9 +92,13 @@ class Beer(models.Model):
 
 
 class Vote(models.Model):
-    beer = models.ForeignKey(Beer, on_delete=models.CASCADE, related_name="votes")
-    user = models.ForeignKey(Taster, on_delete=models.CASCADE, related_name='beer_votes')
-    score = models.PositiveSmallIntegerField()
+    tasting_beer = models.ForeignKey(
+        TastingBeer, on_delete=models.CASCADE, related_name="votes"
+    )
+    user = models.ForeignKey(
+        "Taster", on_delete=models.CASCADE, related_name="beer_votes"
+    )
+    score = models.DecimalField()
     comment = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -57,14 +106,14 @@ class Vote(models.Model):
         ordering = ["-updated_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=["beer", "user"],
-                name="one_vote_per_user_per_beer",
+                fields=["tasting_beer", "user"],
+                name="one_vote_per_tasting_beer_user",
             ),
             models.CheckConstraint(
-                condition=models.Q(score__gte=1) & models.Q(score__lte=5),
-                name="vote_score_1_to_5",
+                condition=models.Q(score__gte=1) & models.Q(score__lte=10),
+                name="tasting_vote_score_1_to_10",
             ),
         ]
 
     def __str__(self):
-        return f"{self.user} — {self.beer}: {self.score}"
+        return f"{self.user} — {self.tasting_beer}: {self.score}"

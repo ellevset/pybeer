@@ -1,16 +1,56 @@
 <h1>Christmas beer tasting</h1>
-<p><a href="{% url 'my_votes' %}">My votes</a></p>
+<p><a href="{% url 'tasting:my_votes' %}">My votes</a></p>
 
-<ul>
-  {% for beer in beers %}
-    <li>
-      {{ beer.name }}{% if beer.brewery %} — {{ beer.brewery }}{% endif %}
-      {% if beer.style %} ({{ beer.style }}){% endif %}
-      {% if beer.abv %} · {{ beer.abv }}% ABV{% endif %}
-      — Your vote: {{ beer.my_score|default:"Not voted" }}
-      <a href="{% url 'vote_for_beer' beer.id %}">Vote / edit</a>
-    </li>
-  {% empty %}
-    <li>No beers have been added yet.</li>
-  {% endfor %}
-</ul>
+<h1 class="mb-4">Christmas beer tasting</h1>
+
+<p class="mb-3">
+  <a class="btn btn-outline-primary btn-sm" href="{% url 'tasting:my_votes' %}">
+    My votes
+  </a>
+</p>
+
+<div class="table-responsive">
+  <table class="table table-hover table-striped align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Beer</th>
+        <th scope="col">Brewery</th>
+        <th scope="col">Style</th>
+        <th scope="col" class="text-nowrap">ABV</th>
+        <th scope="col">Your vote</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for beer in beers %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td class="fw-semibold">{{ beer.name }}</td>
+          <td>{{ beer.brewery|default:"—" }}</td>
+          <td>{{ beer.style|default:"—" }}</td>
+          <td>{% if beer.abv %}{{ beer.abv }}%{% else %}—{% endif %}</td>
+          <td>
+            {% if beer.my_score %}
+              <span class="badge text-bg-success">{{ beer.my_score }} / 10</span>
+            {% else %}
+              <span class="text-body-secondary">Not voted</span>
+            {% endif %}
+          </td>
+          <td>
+            <a class="btn btn-sm btn-primary"
+               href="{% url 'tasting:vote_for_beer' beer.id %}">
+              Vote / edit
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-body-secondary py-4">
+            No beers found.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

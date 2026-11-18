@@ -1,0 +1,19 @@
+{% extends "tasting/base.html" %}
+
+{% block title %}Tasters · Beer Tastings{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Tasters</h1>
+
+<div class="list-group">
+  {% for taster in tasters %}
+    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+       href="{% url 'tasting:taster-votes' taster.id %}">
+      <span>{{ taster.full_name|default:taster.username }}</span>
+      <span class="badge text-bg-primary rounded-pill">View votes</span>
+    </a>
+  {% empty %}
+    <div class="list-group-item text-muted">No tasters found.</div>
+  {% endfor %}
+</div>
+{% endblock %}
